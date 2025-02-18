@@ -115,7 +115,9 @@
       <p>
         The following grid shows some png screenshots of basic/test4.svg with
         the default viewing parameters and with the pixel inspector centered on
-        an interesting part of the scene.
+        an interesting part of the scene. We see a lot of jaggies on the edges
+        of the triangles and especially when the angle is sharp (at the vertices
+        of the triangles).
       </p>
       <div style="display: flex; flex-direction: column; align-items: center">
         <table
@@ -194,7 +196,7 @@
         </li>
         <li>
           In set_sample_rate and set_framebuffer_target, we resize the
-          sample_buffer to width * height * sample_rate
+          sample_buffer to width * height * sample_rate.
         </li>
       </ul>
       <p>
@@ -448,40 +450,44 @@
       </p>
 
       <p>
-        <b>Pixel sampling:</b> In terms of speed, P-nearest sampling is faster
-        because it only needs 1 lookup. P-bilinear sampling will require 4
-        lookups and a bit of calculation so it will be slower. In terms of
-        antialiasing, P-nearest sampling doesn’t perform any antialiasing so it
-        produces the most pixelated images with jaggies while P-bilinear
-        smoothes out the transitions through linear interpolation.
+        Comparing the tradeoffs between speed, memory usage, and antialiasing
+        power between the three various techniques:
       </p>
+      <ul>
+        <li>
+          <b>Pixel sampling:</b> In terms of speed, P-nearest sampling is faster
+          because it only needs 1 lookup. P-bilinear sampling will require 4
+          lookups and a bit of calculation so it will be slower. In terms of
+          antialiasing, P-nearest sampling doesn’t perform any antialiasing so
+          it produces the most pixelated images with jaggies while P-bilinear
+          smoothes out the transitions through linear interpolation.
+        </li>
 
+        <li>
+          <b>Level sampling:</b> In terms of speed, using mipmaps (for L-nearest
+          and L-bilinear sampling) improves rendering speed since it reduces the
+          number of texture fetches needed for distant objects in the image. In
+          terms of memory usage, L-zero defaults to using the full-resolution
+          texture so no mipmap is needed. Using L-nearest sampling and
+          L-bilinear sampling requires the additional storage for mipmaps up to
+          <b>D = floor(min(std::log2(width), std::log2(height)))</b> levels. In
+          terms of antialiasing, compared to L-zero, L-nearest and L-bilinear
+          help reduce aliasing, especially in image minification. When
+          P-bilinear and L-bilinear are combined, we are essentially performing
+          trilinear sampling which produces the most smooth (but also blurry)
+          image as we interpolate across mipmaps.
+        </li>
+        <li>
+          <b>Supersampling rate:</b> In terms of speed, the higher the sampling
+          rate, the more lookups we need per pixel. In terms of memory usage,
+          the sample buffer also takes up storage space, and the higher the
+          sampling rate, the larger the buffer. In terms of antialiasing,
+          supersampling produces great antialiasing effects as it effectively
+          smooths edges and fine details, but it is computationally expensive.
+        </li>
+      </ul>
       <p>
-        <b>Level sampling:</b> In terms of speed, using mipmaps (for L-nearest
-        and L-bilinear sampling) improves rendering speed since it reduces the
-        number of texture fetches needed for distant objects in the image. In
-        terms of memory usage, L-zero defaults to using the full-resolution
-        texture so no mipmap is needed. Using L-nearest sampling and L-bilinear
-        sampling requires the additional storage for mipmaps up to
-        <b>D = floor(min(std::log2(width), std::log2(height)))</b> levels. In
-        terms of antialiasing, compared to L-zero, L-nearest and L-bilinear help
-        reduce aliasing, especially in image minification. When P-bilinear and
-        L-bilinear are combined, we are essentially performing trilinear
-        sampling which produces the most smooth (but also blurry) image as we
-        interpolate across mipmaps.
-      </p>
-
-      <p>
-        <b>Supersampling rate:</b> In terms of speed, the higher the sampling
-        rate, the more lookups we need per pixel. In terms of memory usage, the
-        sample buffer also takes up storage space, and the higher the sampling
-        rate, the larger the buffer. In terms of antialiasing, supersampling
-        produces great antialiasing effects as it effectively smooths edges and
-        fine details, but it is computationally expensive.
-      </p>
-
-      <p>
-        The following grid shows versions of our own image, using the
+        The following grid shows 6 versions of our own image, using the
         combinations of L_ZERO and P_NEAREST, L_ZERO and P_LINEAR, L_NEAREST and
         P_NEAREST, L_NEAREST and P_LINEAR, L_LINEAR and P_NEAREST, and L_LINEAR
         and P_LINEAR.
