@@ -706,16 +706,19 @@
       </p>
       <p>
         More specifically, the 2nd and 3rd bounces of light make the
-        (accumulated) image much brighter and more realistic. The 2nd bounce of
-        light allows surfaces that are not directly lit to receive illumination
-        from nearby objects. We can see that the underside of the bunny and the
-        lower corners of the wall are lit up even though they don't directly
-        face the light source. This is because they still receive light that
-        bounces off of the floor. The 3rd bounce of light accounts for the more
-        subtle interreflections of light across different surfaces in the scene.
-        The contribution is minimal as we can see when isAccumBounces=false, the
-        3rd bounce of light is much dimmer compared to the 1st and 2nd bounces
-        of light. However, it still helps make the overall image more natural.
+        (accumulated) image much brighter and more realistic. The indirect
+        illumination from these bounces adds depth and subtle shading variations
+        that would be difficult to achieve using traditional rasterization
+        techniques. The 2nd bounce of light allows surfaces that are not
+        directly lit to receive illumination from nearby objects. We can see
+        that the underside of the bunny and the lower corners of the wall are
+        lit up even though they don't directly face the light source. This is
+        because they still receive light that bounces off of the floor. The 3rd
+        bounce of light accounts for the more subtle interreflections of light
+        across different surfaces in the scene. The contribution is minimal as
+        we can see when isAccumBounces=false, the 3rd bounce of light is much
+        dimmer compared to the 1st and 2nd bounces of light. However, it still
+        helps make the overall image more natural.
       </p>
       <h3>Russian Roulette</h3>
       <p>
