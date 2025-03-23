@@ -28,16 +28,33 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 3 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names: Angela He, Cady He</div>
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-		
+		Link to webpage:
+		<a href="https://cal-cs184-student.github.io/hw-webpages-che-ahe-writeup/"
+		  >https://cal-cs184-student.github.io/hw-webpages-che-ahe-writeup/</a
+		>
+  
+		<br />
+  
+		Link to GitHub repository for webpage:
+		<a href="https://github.com/cal-cs184-student/hw-webpages-che-ahe-writeup"
+		  >https://github.com/cal-cs184-student/hw-webpages-che-ahe-writeup</a
+		>
+  
+		<br />
+  
+		Link to GitHub repository:
+		<a href="https://github.com/cal-cs184-student/sp25-hw3-che-ahe-hw3"
+		  >https://github.com/cal-cs184-student/sp25-hw2-che-ahe-hw3</a
+		>
+
+		<br />
 		<figure>
 			<img src="cornell.png" alt="Cornell Boxes with Bunnies" style="width:70%"/>
-			<figcaption>You can add images with captions!</figcaption>
+			<figcaption>Cornell Boxes with Bunnies</figcaption>
 		</figure>
 
 		<!--
@@ -45,10 +62,27 @@
 		-->
 
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		In this assignment, we first implemented methods to generate rays via sampling, trace rays through the scene, and calculate intersections of the rays with different objects/primitives in the scene. To effectively trace ray intersections, we built a BVH tree to keep track of all of the primitives in the scene, improving our traversal efficiency. We then implemented various functions to calculate direct and global illumination in scenes with objects that have a diffuse BSDF. In direct and global illumination implementations, we tried to improve the rendering quality and efficiency using heuristics like importance sampling, Russian Roulette, and adaptive sampling.
+		
+		What we’ve learned:
+		<ul>
+			<li>Completing this assignment really helped us solidify our understanding of path tracing. One thing we understood more, as we broke down our code, was the recursive nature of calculating global illumination.</li>
+			<li>It was very rewarding to see the dramatic speed-ups achieved by using a bounding volume hierarchy, as well as the noise reduction and slight speed-ups achieved by using importance sampling, Russian Roulette, and adaptive sampling.</li>
+		</ul>
+
 
 		<h2>Part 1: Ray Generation and Scene Intersection</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<b>Camera Ray Generation</b>
+		<ol>
+			<li>First, we translate and scale x and y to camera-space dimensions. We translate x and y by -0.5 to realign to a (0, 0, 0) origin. Then, we scale x and y to camera-space dimensions by scaling by a factor of 2 * (tan(convertToRadians(hFov / 2)))and 2 * (tan(convertToRadians(vFov / 2))), respectively.</li> 
+			<li>We apply the camera-to-world rotation matrix to the ray direction vector we just found <xCamSpace, yCamSpace, -1>. We also normalize the ray direction vector.</li>
+			<li>We apply the camera-to-world rotation matrix to the origin, as well.</li>
+			<li>We initialize the final ray Ray(originWorldSpace, dirWorldSpace), set ray.min_t = nClip, ray.max_t = fClip, and return the ray.</li>
+
+		</ol>
+
+
+
 
 		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
@@ -86,21 +120,59 @@
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Part 5: Adaptive Sampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>(Optional) Part 6: Extra Credit Opportunities</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
+		<p>
+			To get rid of noise, one strategy is to increase the number 
+			of samples per pixel. While this works, it is costly and 
+			also does not take into account the fact that some pixel's 
+			calculated illuminance converges faster than others. Adaptive 
+			sampling is a strategy to minimize the amount of samples we 
+			need when we calculate the illuminance of a pixel. The idea 
+			is to stop sampling early, once we are confident enough that 
+			the illuminance estimated so far is close to convergence, and 
+			only take more samples on pixels that are more difficult to 
+			converge.
+		</p>
+		<p>
+			We modified our part 1 implementation of raytrace_pixel() to 
+			keep track of the illuminance, the illuminance squared, the 
+			mean, the variance, and the convergence level of the samples. 
+			As we loop through num_samples, we add the current sample's 
+			illuminance to the sum of all illuminances and the sum of 
+			squared illuminances. We also recalculate a new mean, 
+			variance, and convergence level for every samplesPerBatch 
+			number of samples. We have a check so that if (i+1) % 
+			samplesPerBatch == 0, we update the mean, the variance, 
+			and the convergence level. If the convergence level is 
+			less than or equal to maxTolerance * mean at the time, 
+			we break the loop. After breaking the loop, we then take 
+			the average of the sample values by dividing it by how many 
+			samples we actually used before breaking out of the loop and 
+			update sampleCountBuffer accordingly to generate the rate map.
+		</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="cornell.png" width="400px"/>
+				  <figcaption>Caption goes here.</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="cornell.png" width="400px"/>
+				  <figcaption>Caption goes here.</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="cornell.png" width="400px"/>
+				  <figcaption>Caption goes here.</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="cornell.png" width="400px"/>
+				  <figcaption>Caption goes here.</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 		</div>
 	</body>
 </html>
