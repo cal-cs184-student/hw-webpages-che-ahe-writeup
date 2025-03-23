@@ -117,7 +117,281 @@
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Part 4: Global Illumination</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<h3>Indirect Lighting Implementation</h3>
+		<p>
+			In est_radiance_global_illumination(), we made slight 
+			modifications to make sure we keep track of direct 
+			(L_out_direct) and indirect (L_out_indirect) lighting 
+			separately. If isAccumBounces || r.depth == 0, we set 
+			L_out_direct to zero_bounce_radiance(). Otherwise, 
+			L_out_direct is set to Vector3D(0, 0, 0) because we 
+			won't need to track the illumination until the requested 
+			depth. L_out_indirect is set to at_least_one_bounce_radiance() 
+			regardless and the accumulation logic is taken care of in 
+			the function.
+		</p>
+		<p>
+			In at_least_one_bounce_radiance(), we first check the ray 
+			depth. If the ray depth is 0, we stop the recursion and 
+			return Vector3D(0, 0, 0), and if it's 1, we only return direct 
+			lighting using one_bounce_radiance(). For additional bounces, 
+			we add the direct lighting contribution if isAccumBounces is 
+			enabled, then sample a new bounce direction from the BSDF and 
+			trace a new ray. In each recursion, we decrement the ray depth 
+			by 1 until we hit the base case. If this ray intersects another 
+			surface, we recursively call at_least_one_bounce_radiance(new_r, 
+			new_isect) * fr * cos_theta_i / pdf / 0.7 to accumulate indirect 
+			lighting by adding it to L_out. To avoid infinite recursion, we 
+			use Russian roulette with a 70% probability of continuing the 
+			path before we make the recursive call. We also make sure to 
+			divide the radiance by 0.7 when adding it to L_out.
+		</p>
+		<h4>Images Rendered With Global Illumination</h4>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_2/CBwallE_s1024_4_2.png" width="400px"/>
+				  <figcaption>wall-e.dae</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_2/dragon_s1024_4_2.png" width="400px"/>
+				  <figcaption>dragon.dae</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		<h3>Direct v.s. Indirect Illumination</h3>
+		<p>
+			Below, we have our sphere scene rendered with only direct 
+			illumination (left), v.s. only indirect illumination (right).
+		</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_3/spheres_task4_only_direct.png" width="400px"/>
+				  <figcaption>Only direct lighting.</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_3/spheres_task4_only_indirect.png" width="400px"/>
+				  <figcaption>Only indirect lighting.</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		<p>
+			We see that the light source is illuminated in direct 
+			illumination, but is dark with only indirect illumination, 
+			which tracks since indirect illumination will not include 
+			zero-bounce radiance. The direct contribution of the light 
+			source on the scene is also excluded in indirect illumination, 
+			which causes the indirect illumination scene to be dimmer 
+			overall compared to the direct illumination scene. The shadows 
+			in the direct illumination scene are much darker and harsher, 
+			since they cannot be lit by residual light bounces from the 
+			environment. Finally, in the indirect illumination scene, the 
+			spheres, wall, floor, and ceiling all have a soft pink/blue 
+			color in the parts closer to the pink or blue walls, caused by 
+			light bouncing off these colored walls. This is absent in the 
+			direct illumination scene.
+		</p>
+		<h3>Varying Max Ray Depth & Accumulate Bounces</h3> 
+		<p>
+			We now compare rendered views of accumulated and unaccumulated 
+			bounces for CBbunny.dae with max_ray_depth set to 0, 1, 2, 3, 4, 
+			and 5 (using 1024 samples per pixel).
+		</p>
+		<h4><u>isAccumBounces=false</u></h4>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m0_o.png" width="400px"/>
+				  <figcaption>m=0</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m1_o.png" width="400px"/>
+				  <figcaption>m=1</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m2_o.png" width="400px"/>
+				  <figcaption>m=2</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m3_o.png" width="400px"/>
+				  <figcaption>m=3</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m4_o.png" width="400px"/>
+				  <figcaption>m=4</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m5_o.png" width="400px"/>
+				  <figcaption>m=5</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		<h4><u>isAccumBounces=true</u></h4>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m0.png" width="400px"/>
+				  <figcaption>m=0</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m1.png" width="400px"/>
+				  <figcaption>m=1</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m2.png" width="400px"/>
+				  <figcaption>m=2</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m3.png" width="400px"/>
+				  <figcaption>m=3</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m4.png" width="400px"/>
+				  <figcaption>m=4</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_4/CBbunny_s1024_4_4_m5.png" width="400px"/>
+				  <figcaption>m=5</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		<p>
+			When isAccumBounces=false, we see the light source at the 
+			top only in max_ray_depth=0. In the rest of the screenshots 
+			where 1 <= max_ray_depth <= 5, we see the image gets dimmer 
+			and dimmer. This makes sense because the indirect light gets 
+			reflected and absorbed at each bounce so the amount of light 
+			hitting the camera decreases. When isAccumBounces=true, direct 
+			and indirect lights are accumulated over bounces so the image 
+			gets progressively brighter. However, as max_ray_depth 
+			increases, the additional light contribution becomes smaller 
+			with each bounce, so it becomes hard to tell the difference in 
+			the last couple of screenshots.
+		</p>
+		<p>
+			More specifically, the 2nd and 3rd bounces of light make the 
+			(accumulated) image much brighter and more realistic. The 
+			2nd bounce of light allows surfaces that are not directly 
+			lit to receive illumination from nearby objects. We can see 
+			that the underside of the bunny and the lower corners of the 
+			wall are lit up even though they don't directly face the light 
+			source. This is because they still receive light that bounces 
+			off of the floor. The 3rd bounce of light accounts for the more 
+			subtle interreflections of light across different surfaces in 
+			the scene. The contribution is minimal as we can see when 
+			isAccumBounces=false, the 3rd bounce of light is much dimmer 
+			compared to the 1st and 2nd bounces of light. However, it still 
+			helps make the overall image more natural.
+		</p>
+		<h3>Russian Roulette</h3>
+		<p>
+			We now output Russian Roulette rendering with max_ray_depth
+			set to 0, 1, 2, 3, 4, and 100.
+		</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_5/CBbunny_s1024_4_4_m0_rr.png" width="400px"/>
+				  <figcaption>m=0</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_5/CBbunny_s1024_4_4_m1_rr.png" width="400px"/>
+				  <figcaption>m=1</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_5/CBbunny_s1024_4_4_m2_rr.png" width="400px"/>
+				  <figcaption>m=2</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_5/CBbunny_s1024_4_4_m3_rr.png" width="400px"/>
+				  <figcaption>m=3</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_5/CBbunny_s1024_4_4_m4_rr.png" width="400px"/>
+				  <figcaption>m=4</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_5/CBbunny_s1024_4_4_m100_rr.png" width="400px"/>
+				  <figcaption>m=100</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		<h3>Varying Samples per Pixel</h3>
+		<p>
+			Below, we compare views of our bunny scene rendered with 
+			1, 2, 4, 8, 16, 64, and 1024 samples per pixel (with 4 
+			light ray samples per area light). We observe that the noise 
+			levels decrease as the sample-per-pixel rate increases. 
+			Higher sample counts reduce variance, leading to a smoother, 
+			more realistic, and cleaner rendering. As we explained in 
+			earlier parts of the writeup, varying -l (samples per light 
+			area) reduces noise in the soft shadows. In this case, varying 
+			-s (samples per pixel) decreases the noise levels for the 
+			overall image, improving the image quality in all aspects.
+		</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_6/CBbunny_task4_s1_l4.png" width="400px"/>
+				  <figcaption>Samples per pixel = 1</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_6/CBbunny_task4_s2_l4.png" width="400px"/>
+				  <figcaption>Samples per pixel = 2</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_6/CBbunny_task4_s4_l4.png" width="400px"/>
+				  <figcaption>Samples per pixel = 4</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_6/CBbunny_task4_s8_l4.png" width="400px"/>
+				  <figcaption>Samples per pixel = 8</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="part4_6/CBbunny_task4_s16_l4.png" width="400px"/>
+				  <figcaption>Samples per pixel = 16</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="part4_6/CBbunny_task4_s64_l4.png" width="400px"/>
+				  <figcaption>Samples per pixel = 64</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+					<img src="part4_6/CBbunny_task4_s1024_l4.png" width="400px"/>
+					<figcaption>Samples per pixel = 1024</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 		<h2>Part 5: Adaptive Sampling</h2>
 		<p>
@@ -153,23 +427,23 @@
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="part5/spheres_adaptive.png" width="400px"/>
+				  <figcaption>CBspheres_lambertian - Noise-free rendered result.</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="part5/spheres_adaptive_rate.png" width="400px"/>
+				  <figcaption>CBspheres_lambertian - sample rate visualization.</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
+					<img src="part5/bunny_adaptive.png" width="400px"/>
+					<figcaption>CBbunny - Noise-free rendered result.</figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="part5/bunny_adaptive_rate.png" width="400px"/>
+					<figcaption>CBbunny - sample rate visualization.</figcaption>
+				  </td>
 			  </tr>
 			</table>
 		</div>
