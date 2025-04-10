@@ -294,7 +294,7 @@
       </div>
 
       <p>
-        Here is a screenshot of the shaded cloth from scene/pinned4.json in its
+        Here is a screenshot of the shaded cloth from scene/pinned4.json with the default parameters in its
         final resting state. The cloth has 4 pinned points instead of 2.
       </p>
       <figure>
@@ -723,7 +723,7 @@
 
       <br />
       <p>
-        We now apply bump mapping and displacement mapping (with texture_3.png)
+        We now apply bump mapping and displacement mapping (with a brick wall texture, AKA texture_3.png)
         on the cloth and sphere. Both techniques simulate a tactile texture.
         However, bump mapping only creates the illusion of details by modifying
         the normal vectors of the objects so that when the fragment shader
@@ -735,7 +735,7 @@
       <p>
         We can see this difference in our renderings: bump mapping only results
         in shading that gives the illusion of tactile texture, but the cloth
-        falls on the sphere as if they were smooth. With displacement mapping
+        falls on the sphere as if they were smooth. Displacement mapping
         results in actual tactile texture to the cloth and the sphere, affecting
         the way the cloth rests on the sphere.
       </p>
@@ -774,6 +774,33 @@
         The higher coarseness sphere’s displacement mapping is able to capture
         the texture details much better.
       </p>
+      <div style="display: flex; flex-direction: column; align-items: center">
+        <table
+          style="width: 100%; text-align: center; border-collapse: collapse"
+        >
+          <tr>
+            <td style="text-align: center">
+              <img src="part5-bump-displace/bump o 16 a 16.png" width="400px" />
+              <figcaption>Bump mapping -o 16 -a 16	</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="part5-bump-displace/bump o 128 a 128.png" width="400px" />
+              <figcaption>Bump mapping -o 128 -a 128</figcaption>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center">
+              <img src="part5-bump-displace/displacement o 16 a 16.png" width="400px" />
+              <figcaption>Displacement mapping -o 16 -a 16</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="part5-bump-displace/displacement o 128 a 128.png" width="400px" />
+              <figcaption>Displacement mapping -o 128 -a 128</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
       <br />
       <p>Here is a mirror shader on the cloth and sphere.</p>
       <div style="display: flex; flex-direction: column; align-items: center">
